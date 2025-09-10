@@ -4,9 +4,10 @@ on:
   push:
     branches: [ main, dev ]
 
-permissions:
-  id-token: write
-  contents: read
+# permissions block not required for client-secret auth
+# permissions:
+#   id-token: write
+#   contents: read
 
 jobs:
   deploy:
@@ -22,11 +23,12 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Azure login (OIDC)
+      - name: Azure login (client secret)
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           allow-no-subscriptions: true
 
       - name: Install dependencies
