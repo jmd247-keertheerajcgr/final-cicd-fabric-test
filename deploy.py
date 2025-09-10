@@ -2,9 +2,7 @@
 # Licensed under the MIT License.
 
 import os
-import time
 import msal
-from azure.core.credentials import AccessToken
 from fabric_cicd import FabricWorkspace, publish_all_items, unpublish_all_orphan_items
 
 # ---- Config (use secrets from GitHub Actions) ----
@@ -19,14 +17,6 @@ WORKSPACE_ID = "b8284fa4-3266-4b97-84a6-04e6808c474d"
 ENVIRONMENT = "dev"  # must match keys in parameter.yml if used
 REPO_DIR = "."
 ITEM_TYPES = ["Lakehouse", "Notebook", "Environment"]
-
-# ---- Minimal TokenCredential wrapper for a static bearer ----
-class StaticTokenCredential:
-    def __init__(self, token: str, expires_in: int = 3500):
-        self._token = token
-        self._exp = int(time.time()) + expires_in
-    def get_token(self, *scopes, **kwargs) -> AccessToken:
-        return AccessToken(self._token, self._exp)
 
 def acquire_fabric_token(tenant_id: str, client_id: str, client_secret: str, auth_host: str = "https://login.microsoftonline.com") -> str:
     """Acquire a Fabric-scoped AAD token using client credentials."""
@@ -46,15 +36,13 @@ def main():
     # 1) Acquire Fabric-scoped bearer
     access_token = acquire_fabric_token(TENANT_ID, CLIENT_ID, CLIENT_SECRET)
 
-    # 2) Wrap in StaticTokenCredential so FabricWorkspace won’t use DefaultAzureCredential
-    cred = StaticTokenCredential(access_token)
-
+    # 2) Initialize FabricWorkspace using direct access_token
     ws = FabricWorkspace(
         workspace_id=WORKSPACE_ID,
         environment=ENVIRONMENT,
         repository_directory=REPO_DIR,
         item_type_in_scope=ITEM_TYPES,
-        credential=cred   # ✅ force our credential
+        access_token=access_token   # ✅ force raw token injection
     )
 
     # 3) Deploy
