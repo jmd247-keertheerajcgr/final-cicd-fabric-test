@@ -24,3 +24,5 @@ jobs:
       - name: Run deployment script
         run: |
           python deploy.py
+        env:
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
