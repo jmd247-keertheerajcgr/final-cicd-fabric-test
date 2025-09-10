@@ -5,7 +5,7 @@ import os
 import msal
 from fabric_cicd import FabricWorkspace, publish_all_items, unpublish_all_orphan_items
 
-# ---- Config (use secrets from GitHub Actions) ----
+# ---- Config ----
 TENANT_ID = "2800c0a0-70e9-49be-8733-faeaa6aced99"
 CLIENT_ID = "222b7cc4-e65d-4e09-98ac-35b39f244873"
 
@@ -14,14 +14,13 @@ if not CLIENT_SECRET:
     raise RuntimeError("AZURE_CLIENT_SECRET is not set. Did you configure it in GitHub Secrets?")
 
 WORKSPACE_ID = "b8284fa4-3266-4b97-84a6-04e6808c474d"
-ENVIRONMENT = "dev"  # must match keys in parameter.yml if used
+ENVIRONMENT = "dev"
 REPO_DIR = "."
 ITEM_TYPES = ["Lakehouse", "Notebook", "Environment"]
 
-def acquire_fabric_token(tenant_id: str, client_id: str, client_secret: str, auth_host: str = "https://login.microsoftonline.com") -> str:
-    """Acquire a Fabric-scoped AAD token using client credentials."""
-    authority = f"{auth_host.rstrip('/')}/{tenant_id}"
-    scopes = ["https://api.fabric.microsoft.com/.default"]  # Fabric audience
+def acquire_fabric_token(tenant_id: str, client_id: str, client_secret: str) -> str:
+    authority = f"https://login.microsoftonline.com/{tenant_id}"
+    scopes = ["https://api.fabric.microsoft.com/.default"]
     app = msal.ConfidentialClientApplication(
         client_id=client_id,
         authority=authority,
@@ -33,19 +32,21 @@ def acquire_fabric_token(tenant_id: str, client_id: str, client_secret: str, aut
     return result["access_token"]
 
 def main():
-    # 1) Acquire Fabric-scoped bearer
+    # 1) Get token with MSAL
     access_token = acquire_fabric_token(TENANT_ID, CLIENT_ID, CLIENT_SECRET)
 
-    # 2) Initialize FabricWorkspace using direct access_token
+    # 2) Force fabric-cicd to use this token by setting env var
+    os.environ["FABRIC_ACCESS_TOKEN"] = access_token
+
+    # 3) Initialize workspace
     ws = FabricWorkspace(
         workspace_id=WORKSPACE_ID,
         environment=ENVIRONMENT,
         repository_directory=REPO_DIR,
-        item_type_in_scope=ITEM_TYPES,
-        access_token=access_token   # ✅ force raw token injection
+        item_type_in_scope=ITEM_TYPES
     )
 
-    # 3) Deploy
+    # 4) Deploy
     publish_all_items(ws)
     unpublish_all_orphan_items(ws)
 
