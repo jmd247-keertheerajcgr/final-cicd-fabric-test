@@ -2,9 +2,7 @@ name: Fabric CI/CD Deployment
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [ main, dev ]
 
 jobs:
   deploy:
@@ -12,18 +10,26 @@ jobs:
     environment: AZURE
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      - name: Azure login (service principal)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
       - name: Install dependencies
-        run: pip install --upgrade fabric_cicd
+        run: pip install --upgrade fabric_cicd msal
 
       - name: Run deployment script
-        run: |
-          python deploy.py
+        run: python deploy.py
         env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
