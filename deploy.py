@@ -46,13 +46,15 @@ def main():
     # 1) Acquire Fabric-scoped bearer
     access_token = acquire_fabric_token(TENANT_ID, CLIENT_ID, CLIENT_SECRET)
 
-    # 2) Always pass raw token to FabricWorkspace (avoid DefaultAzureCredential fallback)
+    # 2) Wrap in StaticTokenCredential so FabricWorkspace won’t use DefaultAzureCredential
+    cred = StaticTokenCredential(access_token)
+
     ws = FabricWorkspace(
         workspace_id=WORKSPACE_ID,
         environment=ENVIRONMENT,
         repository_directory=REPO_DIR,
         item_type_in_scope=ITEM_TYPES,
-        access_token=access_token   # <-- use raw token directly
+        credential=cred   # ✅ force our credential
     )
 
     # 3) Deploy
