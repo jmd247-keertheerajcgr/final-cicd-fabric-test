@@ -11,7 +11,7 @@ from fabric_cicd import FabricWorkspace, publish_all_items, unpublish_all_orphan
 TENANT_ID = "2800c0a0-70e9-49be-8733-faeaa6aced99"
 CLIENT_ID = "222b7cc4-e65d-4e09-98ac-35b39f244873"
 
-os.environ["AZURE_CLIENT_SECRET"] = CLIENT_SECRET
+CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
 WORKSPACE_ID = "b8284fa4-3266-4b97-84a6-04e6808c474d"
 ENVIRONMENT = "dev"  # must match keys in parameter.yml if used
 REPO_DIR = "."
