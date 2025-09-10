@@ -9,7 +9,7 @@ from fabric_cicd import FabricWorkspace, publish_all_items, unpublish_all_orphan
 TENANT_ID = os.getenv("AZURE_TENANT_ID", "2800c0a0-70e9-49be-8733-faeaa6aced99")
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID", "222b7cc4-e65d-4e09-98ac-35b39f244873")
 CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
-WORKSPACE_ID = os.getenv("FABRIC_WORKSPACE_ID", "b8284fa4-3266-4b97-84a6-04e6808c474d")
+WORKSPACE_ID = os.getenv("FABRIC_WORKSPACE_ID", "b8284fa4-3266-4b97-84a6-04e6808c474d") 
 
 if not CLIENT_SECRET:
     raise RuntimeError("AZURE_CLIENT_SECRET is not set. Did you configure it in GitHub Secrets?")
