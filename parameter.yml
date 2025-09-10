@@ -1,0 +1,5 @@
+find_replace:
+  - find_value: "b8284fa4-3266-4b97-84a6-04e6808c474d"
+    replace_value:
+      dev:  "b8284fa4-3266-4b97-84a6-04e6808c474d"
+      prod: "08545946-c712-4df1-8a21-1551e4d84f58"
