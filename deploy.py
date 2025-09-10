@@ -2,7 +2,9 @@
 # Licensed under the MIT License.
 
 import os
+import time
 import msal
+from azure.core.credentials import AccessToken
 from fabric_cicd import FabricWorkspace, publish_all_items, unpublish_all_orphan_items
 
 # ---- Config ----
@@ -18,6 +20,14 @@ ENVIRONMENT = "dev"
 REPO_DIR = "."
 ITEM_TYPES = ["Lakehouse", "Notebook", "Environment"]
 
+# ---- Static credential wrapper ----
+class StaticTokenCredential:
+    def __init__(self, token: str, expires_in: int = 3500):
+        self._token = token
+        self._exp = int(time.time()) + expires_in
+    def get_token(self, *args, **kwargs) -> AccessToken:
+        return AccessToken(self._token, self._exp)
+
 def acquire_fabric_token(tenant_id: str, client_id: str, client_secret: str) -> str:
     authority = f"https://login.microsoftonline.com/{tenant_id}"
     scopes = ["https://api.fabric.microsoft.com/.default"]
@@ -32,18 +42,19 @@ def acquire_fabric_token(tenant_id: str, client_id: str, client_secret: str) -> 
     return result["access_token"]
 
 def main():
-    # 1) Get token with MSAL
+    # 1) Acquire Fabric-scoped bearer
     access_token = acquire_fabric_token(TENANT_ID, CLIENT_ID, CLIENT_SECRET)
 
-    # 2) Force fabric-cicd to use this token by setting env var
-    os.environ["FABRIC_ACCESS_TOKEN"] = access_token
+    # 2) Wrap it in a static credential
+    cred = StaticTokenCredential(access_token)
 
-    # 3) Initialize workspace
+    # 3) Pass it explicitly to FabricWorkspace
     ws = FabricWorkspace(
         workspace_id=WORKSPACE_ID,
         environment=ENVIRONMENT,
         repository_directory=REPO_DIR,
-        item_type_in_scope=ITEM_TYPES
+        item_type_in_scope=ITEM_TYPES,
+        credential=cred   # <---- force credential here
     )
 
     # 4) Deploy
