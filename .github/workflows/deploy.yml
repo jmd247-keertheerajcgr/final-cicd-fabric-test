@@ -2,7 +2,10 @@ name: Fabric CI/CD Deployment
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: 
+      - '*dev*'
+      - '*uat*'
+      - '*prod*'
 
 jobs:
   deploy:
