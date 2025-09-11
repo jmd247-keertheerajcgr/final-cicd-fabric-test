@@ -32,14 +32,6 @@ jobs:
           git config --global user.email "pipeline@company.com"
           git config --global user.name "Azure Pipeline"
 
-      - name: Switch to dev_engineering branch
-        shell: bash
-        run: |
-          git fetch origin dev_engineering:dev_engineering
-          git checkout dev_engineering
-          git pull origin dev_engineering
-          echo "Switched to branch: $(git branch --show-current)"
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
