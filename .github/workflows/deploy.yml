@@ -53,7 +53,7 @@ jobs:
           python -m pip install fabric_cicd
           echo "Virtual environment created and dependencies installed"
 
-      - name: Run main.py from dev_engineering branch
+      - name: Run deploy.py
         shell: bash
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
