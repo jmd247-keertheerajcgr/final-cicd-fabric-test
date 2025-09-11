@@ -12,27 +12,62 @@ jobs:
     runs-on: ubuntu-latest
     environment: AZURE
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
+      persist-credentials: true[4]
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+  - name: Show current and remote branches
+    shell: bash
+    run: |
+      echo "Current ref: $GITHUB_REF"
+      echo "SHA: $GITHUB_SHA"
+      git branch -r[1]
 
-      - name: Azure login (service principal creds)
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          allow-no-subscriptions: true
+  - name: Configure git identity
+    shell: bash
+    run: |
+      git config --global user.email "pipeline@company.com"
+      git config --global user.name "Azure Pipeline"[4]
 
-      - name: Install dependencies
-        run: pip install --upgrade fabric_cicd msal
+  - name: Switch to dev_engineering branch
+    shell: bash
+    run: |
+      git fetch origin dev_engineering:dev_engineering
+      git checkout dev_engineering
+      git pull origin dev_engineering
+      echo "Switched to branch: $(git branch --show-current)"[1]
 
-      - name: Run deployment script
-        run: python deploy.py
-        env:
-          AZURE_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
-          AZURE_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
-          AZURE_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+  - name: Set up Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.10'[5]
+
+  - name: Check Python version
+    shell: bash
+    run: |
+      echo "Using Python:"
+      python3 --version
+      which python3[6]
+
+  - name: Create virtual environment and install dependencies
+    shell: bash
+    run: |
+      python3 -m venv pipeline_venv
+      source pipeline_venv/bin/activate
+      python -m pip install --upgrade pip
+      python -m pip install fabric_cicd
+      echo "Virtual environment created and dependencies installed"[6]
+
+  - name: Run main.py from dev_engineering branch
+    shell: bash
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      workspace_id: ${{ secrets.WORKSPACE_ID }}[3]
+    run: |
+      source pipeline_venv/bin/activate
+      python "${{ env.script_path }}" --workspace_id "${workspace_id}" --repo_dir "${{ github.workspace }}/${{ env.repo_dir }}"[1]
