@@ -60,7 +60,7 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           workspace_id: ${{ secrets.WORKSPACE_ID }}
-          script_path: main.py
+          script_path: deploy.py
           repo_dir: .
         run: |
           source pipeline_venv/bin/activate
