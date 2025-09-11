@@ -6,7 +6,7 @@ on:
       - '*dev*'
       - '*uat*'
       - '*prod*'
-
+ 
 jobs:
   deploy:
     runs-on: ubuntu-latest
