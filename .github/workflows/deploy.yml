@@ -17,20 +17,20 @@ steps:
     uses: actions/checkout@v4
     with:
       fetch-depth: 0
-      persist-credentials: true[4]
+      persist-credentials: true
 
   - name: Show current and remote branches
     shell: bash
     run: |
       echo "Current ref: $GITHUB_REF"
       echo "SHA: $GITHUB_SHA"
-      git branch -r[1]
+      git branch -r
 
   - name: Configure git identity
     shell: bash
     run: |
       git config --global user.email "pipeline@company.com"
-      git config --global user.name "Azure Pipeline"[4]
+      git config --global user.name "Azure Pipeline"
 
   - name: Switch to dev_engineering branch
     shell: bash
@@ -38,12 +38,12 @@ steps:
       git fetch origin dev_engineering:dev_engineering
       git checkout dev_engineering
       git pull origin dev_engineering
-      echo "Switched to branch: $(git branch --show-current)"[1]
+      echo "Switched to branch: $(git branch --show-current)"
 
   - name: Set up Python
     uses: actions/setup-python@v5
     with:
-      python-version: '3.10'[5]
+      python-version: '3.10'
 
   - name: Check Python version
     shell: bash
@@ -59,7 +59,7 @@ steps:
       source pipeline_venv/bin/activate
       python -m pip install --upgrade pip
       python -m pip install fabric_cicd
-      echo "Virtual environment created and dependencies installed"[6]
+      echo "Virtual environment created and dependencies installed"
 
   - name: Run main.py from dev_engineering branch
     shell: bash
@@ -67,7 +67,7 @@ steps:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      workspace_id: ${{ secrets.WORKSPACE_ID }}[3]
+      workspace_id: ${{ secrets.WORKSPACE_ID }}
     run: |
       source pipeline_venv/bin/activate
-      python "${{ env.script_path }}" --workspace_id "${workspace_id}" --repo_dir "${{ github.workspace }}/${{ env.repo_dir }}"[1]
+      python "${{ env.script_path }}" --workspace_id "${workspace_id}" --repo_dir "${{ github.workspace }}/${{ env.repo_dir }}"
