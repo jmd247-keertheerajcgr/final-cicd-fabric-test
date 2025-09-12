@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Show current and remote branches
+      - name: Show current and remote branches 
         shell: bash
         run: |
           echo "Current ref: $GITHUB_REF"
